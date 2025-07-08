@@ -1,0 +1,34 @@
+
+name: 'weather'
+services:
+  rabbitmq:
+    image: rabbitmq:3.13.1-alpine
+    volumes:
+      - ./docker/rabbitmq/config:/etc/rabbitmq
+    ports:
+      - 5672:5672 # for development
+      - 15672:15672 # for development
+
+  redis:
+    image: redis:alpine3.18
+    ports:
+      - 6379:6379 # for development
+
+  # Uncomment this if you want to use redisinsight for debugging 
+  # redis_insight:
+  #   container_name: redis_insight
+  #   image: redis/redisinsight:latest
+  #   ports:
+  #     - 8001:5000
+  #   environment:
+  #     - RI_APP_PORT=5000
+
+  mongo:
+    image: mongo
+    ports:
+    - 27017:27017 # for development
+    volumes:
+    - mongo_data:/data/db
+
+volumes:
+  mongo_data:

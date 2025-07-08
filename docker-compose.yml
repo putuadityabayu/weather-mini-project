@@ -1,0 +1,44 @@
+name: 'weather'
+services:
+  rabbitmq:
+    image: rabbitmq:3.13.1-alpine
+
+  redis:
+    image: redis:alpine3.18
+
+  mongo:
+    image: mongo
+    volumes:
+    - mongo_data:/data/db
+
+  api-service:
+    build:
+      context: ./api-service
+      dockerfile: Dockerfile
+    image: weather-app/api-services:1.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    environment:
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://rabbitmq}
+      API_SERVICE_MONGODB_URI: ${API_SERVICE_MONGODB_URI:-mongodb://mongodb:27017/weather_app}
+      API_SERVICE_OPENWEATHER_API_KEY: ${API_SERVICE_OPENWEATHER_API_KEY}
+      API_SERVICE_OPENWEATHER_API_BASE_URL: ${API_SERVICE_OPENWEATHER_API_BASE_URL}
+
+  email-worker:
+    build:
+      context: ./email-worker
+      dockerfile: Dockerfile
+    image: weather-app/email-worker:1.0.0
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://rabbitmq}
+
+volumes:
+  mongo_data:
