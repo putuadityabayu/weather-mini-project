@@ -4,6 +4,8 @@
 
 This project implements a microservices-based backend system for a weather application, focusing on fetching, storing, and caching weather data, integrating message queues, and exposing REST APIs.
 
+---
+
 ## Table of Contents
 
 - [Features](#features)
@@ -16,6 +18,8 @@ This project implements a microservices-based backend system for a weather appli
 - [API Endpoints](#api-endpoints)
 - [Testing](#testing)
 
+---
+
 ## Features
 
 - REST API for weather data by location (`/weather?location=...`).
@@ -26,6 +30,10 @@ This project implements a microservices-based backend system for a weather appli
 - Built with TypeScript for type safety.
 - Dockerized for easy deployment and local development.
 - Adheres to Service-Repository design patterns and modular code structure.
+
+![Flowchart](/docs/flowchart.png)
+
+---
 
 ## Architecture
 
@@ -43,6 +51,10 @@ The system is composed of the following microservices and data stores:
 4.  **Redis**: In-memory data store used for caching API responses.
 5.  **RabbitMQ**: Message broker for asynchronous communication between services.
 
+![Architecture Diagram](/docs/architecture-diagram.png)
+
+---
+
 ## Technologies Used
 
 * **Backend**: Node.js, Express.js, TypeScript
@@ -51,6 +63,8 @@ The system is composed of the following microservices and data stores:
 * **Message Broker**: RabbitMQ
 * **Containerization**: Docker, Docker Compose
 * **Testing**: Jest
+
+---
 
 ## Setup and Installation
 
@@ -61,7 +75,7 @@ The system is composed of the following microservices and data stores:
 
 ### Environment Variables
 
-Create a `.env` file in the project root based on `.env.example`
+Create a `.env` file in the project root based on [`.env.example`](/.env.example)
 
 ### Running with Docker Compose
 
@@ -94,6 +108,8 @@ Create a `.env` file in the project root based on `.env.example`
 * **API Service**: `http://localhost:3000`
 * **Redis Insight (Optional)**: `http://localhost:8081` (if you run a Redis Insight service in `docker-compose-dev`)
 * **RabbitMQ Management UI**: `http://localhost:15672` (default credentials: `guest`/`guest` and only in `docker-compose-dev`)
+
+---
 
 ## API Endpoints
 
@@ -141,6 +157,8 @@ The weather data can be explicitly refreshed by sending a GET request to the `/w
 5.  **Email Notification Worker:** The `email-worker`, which continuously listens to this RabbitMQ queue, consumes the message. It then simulates sending an email notification indicating that the weather data for the specified location has been refreshed. This process runs asynchronously in the background.
 
 This mechanism ensures users can request the most current data, while also triggering background notifications without blocking the primary API response.
+
+---
 
 ## Testing
 Unit tests are implemented using Jest.
