@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Putu Aditya <aditya@portalnesia.com>
+ */
+
 import request from 'supertest';
 import express, { Express } from 'express';
 import { WeatherController } from '@src/controllers/weather.controller';

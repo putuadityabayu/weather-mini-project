@@ -76,7 +76,7 @@ export class WeatherService {
         const dbData = await this.weatherRepository.findByLocation(location);
         if (dbData && !forceRefresh) { // If found in DB and not forced refresh
             logger.debug(`Serving weather data for ${location} from MongoDB (cache miss).`);
-            // Optionally, re-cache data from DB if it wasn't in Redis
+            // re-cache data from DB if it wasn't in Redis
             await this.cacheRepository.set(cacheKey, dbData);
             return { ...dbData, source: 'external' }; // Data was originally from external source via DB
         }

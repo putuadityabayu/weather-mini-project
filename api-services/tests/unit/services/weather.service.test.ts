@@ -1,10 +1,17 @@
+/**
+ * Copyright (c) - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Putu Aditya <aditya@portalnesia.com>
+ */
+
 import { WeatherService } from '@src/services/weather.service';
 import { WeatherRepository } from '@src/repositories/weather.repository';
 import { CacheRepository } from '@src/repositories/cache.repository';
 import { publishToQueue } from '@src/config/rabbitmq';
 import logger from '@src/utils/logger';
 import { IWeather } from '@src/interfaces/weather.interface';
-import axios from 'axios';
+import axios, { AxiosError, AxiosHeaders, isAxiosError } from 'axios';
 
 // Mock the dependencies
 jest.mock('axios');
@@ -134,6 +141,40 @@ describe('WeatherService', () => {
             expect(cacheRepository.set).not.toHaveBeenCalled();
             expect(publishToQueue).not.toHaveBeenCalled();
             expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('api.openweathermap.org/data/2.5/weather'), expect.objectContaining({ params: expect.objectContaining({ q: "Surabaya" }) }));
+        });
+
+        it('should use DB if data exists in DB', async () => {
+            cacheRepository.get.mockResolvedValue(null); // Cache miss
+            const dbFallbackData = { ...mockWeatherData, location: 'Bandung', temperature: 5 };
+            weatherRepository.findByLocation.mockResolvedValue(dbFallbackData); // Data ditemukan di DB
+
+            const result = await weatherService.getWeatherData('Bandung', false);
+
+            expect(cacheRepository.get).toHaveBeenCalledWith('weather:bandung');
+            expect(cacheRepository.set).toHaveBeenCalled();
+            expect(weatherRepository.findByLocation).toHaveBeenCalledWith('Bandung');
+            expect(result).toEqual(dbFallbackData);
+            expect(weatherRepository.upsert).not.toHaveBeenCalled();
+        });
+
+        it('should throw error if external API fails and no data in DB', async () => {
+            cacheRepository.get.mockResolvedValue(null); // Cache miss
+            // const mockApiError = new AxiosError("Location not found", "111", undefined, undefined, { status: 404, data: null, statusText: "Not Found", headers: {}, config: { headers: new AxiosHeaders() } });
+            const mockApiError = {
+                isAxiosError: true, response: { status: 404, data: null, statusText: "Not Found", headers: {}, config: { headers: new AxiosHeaders() } }
+            };
+            mockedAxios.isAxiosError.mockReturnValue(true);
+            mockedAxios.get.mockRejectedValue(mockApiError); // Location not found
+            weatherRepository.findByLocation.mockResolvedValue(null); // Data tidak ditemukan di DB
+
+            await expect(weatherService.getWeatherData('Jakarta', false)).resolves.toBe(null);
+
+            expect(cacheRepository.get).toHaveBeenCalledWith('weather:jakarta');
+            expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('api.openweathermap.org/data/2.5/weather'), expect.objectContaining({ params: expect.objectContaining({ q: "Jakarta" }) }));
+            expect(logger.error).toHaveBeenCalledWith('Error fetching weather from external API for Jakarta:', mockApiError);
+            expect(weatherRepository.findByLocation).toHaveBeenCalledWith('Jakarta');
+            expect(weatherRepository.upsert).not.toHaveBeenCalled();
+            expect(cacheRepository.set).not.toHaveBeenCalled();
         });
     });
 });

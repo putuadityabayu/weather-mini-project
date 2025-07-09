@@ -1,0 +1,24 @@
+{
+    "name": "weather-monorepo",
+    "version": "1.0.0",
+    "description": "Root project for API services and Email worker",
+    "main": "index.js",
+    "scripts": {
+        "test": "npm test --workspaces"
+    },
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/putuadityabayu/weather-mini-project.git"
+    },
+    "homepage": "https://portalnesia.com",
+    "author": "Putu Aditya <aditya@portalnesia.com>",
+    "license": "MIT",
+    "workspaces": [
+        "api-services",
+        "email-worker"
+    ],
+    "devDependencies": {
+        "husky": "^9.0.11"
+    }
+}

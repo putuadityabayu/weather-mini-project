@@ -12,7 +12,6 @@ import logger from '@src/utils/logger';
 let redisClient: RedisClientType;
 
 export const connectRedis = async () => {
-    console.log(`redis://${config.redisHost}:${config.redisPort}`)
     redisClient = createClient({
         url: `redis://${config.redisHost}:${config.redisPort}`,
     });

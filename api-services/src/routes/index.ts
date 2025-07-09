@@ -11,6 +11,7 @@ import { WeatherService } from '../services/weather.service';
 import { WeatherRepository } from '../repositories/weather.repository';
 import { CacheRepository } from '../repositories/cache.repository';
 import { weatherRoutes } from './weather.route';
+import logger from '@src/utils/logger';
 
 export const registerAllRoutes = (appRouter: Router) => {
     const weatherRepository = new WeatherRepository();
@@ -22,5 +23,5 @@ export const registerAllRoutes = (appRouter: Router) => {
 
     appRouter.use('/weather', weatherRoutes(weatherController));
 
-    console.log('All routes registered successfully.');
+    logger.debug('All routes registered successfully.');
 };

@@ -1,5 +1,5 @@
 
-name: 'weather'
+name: 'weather-local'
 services:
   rabbitmq:
     image: rabbitmq:3.13.1-alpine

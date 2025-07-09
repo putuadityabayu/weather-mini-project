@@ -13,7 +13,7 @@ services:
 
   api-service:
     build:
-      context: ./api-service
+      context: ./api-services
       dockerfile: Dockerfile
     image: weather-app/api-services:1.0.0
     ports:

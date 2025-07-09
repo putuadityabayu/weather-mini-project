@@ -145,12 +145,7 @@ Unit tests are implemented using Jest.
 
 ### Running Tests
 
-To run unit tests for the API Service:
+To run unit tests for All Service:
 ```bash
-docker-compose run api-service npm test
-```
-
-To run unit tests for the Email Worker:
-```bash
-docker-compose run email-worker npm test
+npm test
 ```
