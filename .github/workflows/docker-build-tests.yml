@@ -1,0 +1,62 @@
+name: Docker Build & Run Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-docker-build-and-run:
+    runs-on: ubuntu-latest
+
+    env:
+      REDIS_HOST: redis
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      API_SERVICE_MONGODB_URI: mongodb://mongo:27017/weather_app
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx (Optional but Recommended)
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Images with Docker Compose
+        run: docker compose build --pull
+
+      - name: Bring up Docker Compose Services
+        run: docker compose up --wait --timeout 300 --detach
+        env:
+          API_SERVICE_OPENWEATHER_API_KEY: ${{ secrets.API_SERVICE_OPENWEATHER_API_KEY }}
+
+      - name: "Check Service Health (Optional: If --wait fails)"
+        run: docker compose ps
+
+      - name: Run Basic Health Checks (API Service)
+        run: |
+          echo "Waiting for API service to be fully responsive..."
+          sleep 10
+          curl --fail http://localhost:3000/health
+          echo "API service is responsive!"
+
+      - name: Verify Email Worker Startup
+        run: |
+          echo "Checking email-worker logs for successful startup message..."
+          sleep 15
+          docker compose logs email-worker | grep -q "Email Worker connected to RabbitMQ and asserted queue: weather_refresh_events"
+          if [ $? -eq 0 ]; then
+            echo "Email worker started successfully and is ready!"
+          else
+            echo "Error: Email worker did not log its successful startup message."
+            exit 1
+          fi
+
+      - name: Display Logs on Failure (Optional)
+        if: failure()
+        run: docker compose logs
+
+      - name: Clean up Docker Compose Environment
+        run: docker compose down --volumes

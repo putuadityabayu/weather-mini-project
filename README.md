@@ -1,3 +1,5 @@
+![Unit Testing](https://github.com/putuadityabayu/weather-mini-project/actions/workflows/unit-tests.yml/badge.svg) ![Docker Build Test](https://github.com/putuadityabayu/weather-mini-project/actions/workflows/docker-build-tests.yml/badge.svg)
+
 # Weather App Backend (Microservices)
 
 This project implements a microservices-based backend system for a weather application, focusing on fetching, storing, and caching weather data, integrating message queues, and exposing REST APIs.
@@ -101,7 +103,7 @@ Create a `.env` file in the project root based on `.env.example`
 
 **Example Response (Success):**
 
-```json
+```jsonc
 {
     "success": true,
     "data": {
@@ -120,7 +122,7 @@ Create a `.env` file in the project root based on `.env.example`
 ```json
 {
     "success": false,
-    "error": "Location not found"
+    "error": "Weather data for the specified location not found."
 }
 ```
 
