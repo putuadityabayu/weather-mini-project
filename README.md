@@ -1,4 +1,4 @@
-![Unit Testing](https://github.com/putuadityabayu/weather-mini-project/actions/workflows/unit-tests.yml/badge.svg)
+![Unit Testing](https://github.com/putuadityabayu/weather-mini-project/actions/workflows/unit-tests.yml/badge.svg) ![Docker Build Test](https://github.com/putuadityabayu/weather-mini-project/actions/workflows/docker-build-tests.yml/badge.svg)
 
 # Weather App Backend (Microservices)
 
