@@ -3,33 +3,38 @@ FROM node:20.18.0-alpine3.19 AS builder
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package.json ./
 COPY package-lock.json ./
+COPY email-worker/package.json ./email-worker/package.json
 
-# Install all dependencies, including devDependencies, as TypeScript compilation is needed.
-RUN npm ci
+RUN npm ci --workspace=email-worker
 
-# Copy all source code.
-COPY . .
+COPY email-worker ./email-worker
 
-# Build the TypeScript application.
-RUN npm run build
+WORKDIR /app/email-worker
 
-# --- STAGE 2: Runner ---
-FROM node:20.18.0-alpine3.19 AS runner
+RUN npm run build:prod
+
+# --- STAGE 2: Deps ---
+FROM node:20.18.0-alpine3.19 AS deps
 
 WORKDIR /app
 
-# Copy only package.json and package-lock.json again.
 COPY package.json ./
 COPY package-lock.json ./
+COPY email-worker/package.json ./email-worker/package.json
 
-# Install only production dependencies.
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --workspace=email-worker
 
-# Copy the compiled application from the 'builder' stage.
-COPY --from=builder /app/dist ./dist
+# --- STAGE 3: Runner ---
+FROM node:20.18.0-alpine3.19 AS runner
 
-# Command to run the application.
-CMD ["node", "dist/src/app.js"]
+WORKDIR /app/email-worker
+
+COPY email-worker/package.json ./package.json
+COPY --from=deps /app/email-worker/node_modules ./node_modules
+COPY --from=builder /app/email-worker/dist ./dist
+
+ENV NODE_ENV=production
+
+CMD ["node", "dist/index.js"]

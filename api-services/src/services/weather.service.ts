@@ -9,7 +9,7 @@ import axios from 'axios';
 import { WeatherRepository } from '@src/repositories/weather.repository';
 import { CacheRepository } from '@src/repositories/cache.repository';
 import { IWeather } from '@src/interfaces/weather.interface';
-import { config } from '@src/config';
+import { config } from '@src/config/index';
 import { publishToQueue } from '../config/rabbitmq';
 import logger from '@src/utils/logger';
 
@@ -61,13 +61,13 @@ export class WeatherService {
         if (!forceRefresh) {
             const cachedData = await this.cacheRepository.get<IWeather>(cacheKey);
             if (cachedData) {
-                logger.debug(`Serving weather data for ${location} from cache.`);
+                logger.info(`Serving weather data for ${location} from cache.`);
                 return { ...cachedData, source: 'cache' };
             }
         } else {
             // Invalidate cache on explicit refresh
             await this.cacheRepository.invalidate(cacheKey);
-            logger.debug(`Forcing refresh, invalidating cache for ${location}`);
+            logger.info(`Forcing refresh, invalidating cache for ${location}`);
             // Publish message to RabbitMQ for notification on refresh
             await publishToQueue('weather_refresh_events', { location: location, timestamp: new Date().toISOString() });
         }
@@ -75,24 +75,24 @@ export class WeatherService {
         // 2. Fetch from MongoDB (if not in cache or forced refresh)
         const dbData = await this.weatherRepository.findByLocation(location);
         if (dbData && !forceRefresh) { // If found in DB and not forced refresh
-            logger.debug(`Serving weather data for ${location} from MongoDB (cache miss).`);
+            logger.info(`Serving weather data for ${location} from MongoDB (cache miss).`);
             // re-cache data from DB if it wasn't in Redis
             await this.cacheRepository.set(cacheKey, dbData);
             return { ...dbData, source: 'external' }; // Data was originally from external source via DB
         }
 
         // 3. Fetch from External API
-        logger.debug(`Fetching weather data for ${location} from external API.`);
+        logger.info(`Fetching weather data for ${location} from external API.`);
         const weatherData = await this.fetchWeatherFromExternalApi(location);
 
         if (weatherData) {
             // 4. Save to MongoDB
             await this.weatherRepository.upsert(location, weatherData);
-            logger.debug(`Saved weather data for ${location} to MongoDB.`);
+            logger.info(`Saved weather data for ${location} to MongoDB.`);
 
             // 5. Cache in Redis
             await this.cacheRepository.set(cacheKey, weatherData);
-            logger.debug(`Cached weather data for ${location} in Redis.`);
+            logger.info(`Cached weather data for ${location} in Redis.`);
         }
 
         return weatherData;

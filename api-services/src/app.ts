@@ -8,7 +8,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { config } from '@src/config';
+import { config } from '@src/config/index';
 import { connectMongoDB, disconnectMongoDB } from '@src/config/db';
 import { connectRedis, disconnectRedis } from '@src/config/redis';
 import { connectRabbitMQ, closeRabbitMQ } from './config/rabbitmq';

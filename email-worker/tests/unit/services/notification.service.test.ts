@@ -82,10 +82,10 @@ describe('NotificationService', () => {
             const consumeCallback = (mockChannel.consume as jest.Mock).mock.calls[0][1];
             await consumeCallback(mockMessage);
 
-            expect(logger.debug).toHaveBeenCalledWith(`Received message: ${JSON.stringify(messagePayload)}`);
+            expect(logger.info).toHaveBeenCalledWith(`Received message: ${JSON.stringify(messagePayload)}`);
             expect(notificationService.sendEmailNotification).toHaveBeenCalledWith('Jakarta');
             expect(mockAck).toHaveBeenCalledWith(mockMessage);
-            expect(logger.debug).toHaveBeenCalledWith(`Message acknowledged for location: ${messagePayload.location}`);
+            expect(logger.info).toHaveBeenCalledWith(`Message acknowledged for location: ${messagePayload.location}`);
             expect(mockNack).not.toHaveBeenCalled();
             expect(logger.error).not.toHaveBeenCalled();
         });
@@ -152,14 +152,14 @@ describe('NotificationService', () => {
             const location = 'New York';
             const promise = notificationService.sendEmailNotification(location);
 
-            expect(logger.debug).not.toHaveBeenCalled(); // Belum dipanggil karena ada setTimeout
+            expect(logger.info).not.toHaveBeenCalled(); // Belum dipanggil karena ada setTimeout
 
             jest.advanceTimersByTime(1000); // Majukan waktu 1 detik
 
             await promise; // Tunggu promise selesai
 
-            expect(logger.debug).toHaveBeenCalledWith(`Simulating email notification for weather refresh in ${location}.`);
-            expect(logger.debug).toHaveBeenCalledWith(`Email content: "Weather data for ${location} has been refreshed."`);
+            expect(logger.info).toHaveBeenCalledWith(`Simulating email notification for weather refresh in ${location}.`);
+            expect(logger.info).toHaveBeenCalledWith(`Email content: "Weather data for ${location} has been refreshed."`);
             expect(logger.error).not.toHaveBeenCalled();
         });
     });

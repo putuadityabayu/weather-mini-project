@@ -20,13 +20,13 @@ export class NotificationService {
                 if (msg) {
                     try {
                         const messageContent = JSON.parse(msg.content.toString());
-                        logger.debug(`Received message: ${JSON.stringify(messageContent)}`);
+                        logger.info(`Received message: ${JSON.stringify(messageContent)}`);
 
                         // Sending email
                         await this.sendEmailNotification(messageContent.location);
 
                         channel?.ack(msg); // Acknowledge message
-                        logger.debug(`Message acknowledged for location: ${messageContent.location}`);
+                        logger.info(`Message acknowledged for location: ${messageContent.location}`);
                     } catch (error) {
                         logger.error('Error processing message:', error);
                         channel?.nack(msg, false, true); // Nack the message, requeue it
@@ -45,8 +45,8 @@ export class NotificationService {
         // For this task, we'll just simulate it.
         return new Promise(resolve => {
             setTimeout(() => {
-                logger.debug(`Simulating email notification for weather refresh in ${location}.`);
-                logger.debug(`Email content: "Weather data for ${location} has been refreshed."`);
+                logger.info(`Simulating email notification for weather refresh in ${location}.`);
+                logger.info(`Email content: "Weather data for ${location} has been refreshed."`);
                 // In a real app, you might check if user subscribed to this location, etc.
                 resolve();
             }, 1000); // Simulate network delay for sending email

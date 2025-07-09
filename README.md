@@ -79,13 +79,13 @@ Create a `.env` file in the project root based on `.env.example`
 3.  **Build and run all services:**
 
     ```bash
-    docker-compose up --build
+    docker-compose up -d --build
     ```
     
     This command will:
     * Build Docker images for `api-service` and `email-worker`.
     * Pull images for `mongodb`, `redis`, and `rabbitmq`.
-    * Start all services in detached mode.
+    * Start all services.
 
 ### Accessing Services
 

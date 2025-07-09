@@ -3,36 +3,45 @@ FROM node:20.18.0-alpine3.19 AS builder
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package.json ./
 COPY package-lock.json ./
+COPY api-services/package.json ./api-services/package.json
 
-# Install all dependencies, including devDependencies, as TypeScript compilation is needed.
-RUN npm ci
+RUN npm ci --workspace=api-services
 
-# Copy all source code.
-COPY . .
+COPY api-services ./api-services
 
-# Build the TypeScript application.
-RUN npm run build
+WORKDIR /app/api-services
 
-# --- STAGE 2: Runner ---
+RUN npm run build:prod
+
+# --- STAGE 2: Deps ---
+FROM node:20.18.0-alpine3.19 AS deps
+
+WORKDIR /app
+
+COPY package.json ./
+COPY package-lock.json ./
+COPY api-services/package.json ./api-services/package.json
+
+RUN npm ci --omit=dev
+
+# --- STAGE 3: Runner ---
 FROM node:20.18.0-alpine3.19 AS runner
 
 WORKDIR /app
 
-# Copy only package.json and package-lock.json again.
-COPY package.json ./
-COPY package-lock.json ./
+COPY package.json ./package.json
+COPY --from=deps /app/node_modules ./node_modules
 
-# Install only production dependencies.
-RUN npm ci --omit=dev
+WORKDIR /app/api-services
 
-# Copy the compiled application from the 'builder' stage.
-COPY --from=builder /app/dist ./dist
+COPY api-services/package.json ./package.json
+COPY --from=deps /app/api-services/node_modules ./node_modules
+COPY --from=builder /app/api-services/dist ./dist
 
-# Expose the port that Express.js listens on.
+ENV NODE_ENV=production
+
 EXPOSE 3000
 
-# Command to run the application.
-CMD ["node", "dist/src/app.js"]
+CMD ["node", "dist/index.js"]

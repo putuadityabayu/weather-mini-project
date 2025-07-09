@@ -23,5 +23,5 @@ export const registerAllRoutes = (appRouter: Router) => {
 
     appRouter.use('/weather', weatherRoutes(weatherController));
 
-    logger.debug('All routes registered successfully.');
+    logger.info('All routes registered successfully.');
 };

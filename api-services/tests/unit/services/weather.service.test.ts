@@ -65,7 +65,7 @@ describe('WeatherService', () => {
             expect(weatherRepository.findByLocation).not.toHaveBeenCalled(); // Cache hit, so no DB lookup
             expect(cacheRepository.set).not.toHaveBeenCalled(); // No new cache set
             expect(publishToQueue).not.toHaveBeenCalled(); // No refresh, so no message published
-            expect(logger.debug).toHaveBeenCalledWith(`Serving weather data for Malang from cache.`);
+            expect(logger.info).toHaveBeenCalledWith(`Serving weather data for Malang from cache.`);
             expect(mockedAxios.get).not.toHaveBeenCalled();
             expect(result).toEqual({ ...mockWeatherData, source: 'cache' });
         });
@@ -92,9 +92,9 @@ describe('WeatherService', () => {
             expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('api.openweathermap.org/data/2.5/weather'), expect.objectContaining({ params: expect.objectContaining({ q: "Mataram" }) }));
             expect(weatherRepository.upsert).toHaveBeenCalledWith("Mataram", expect.objectContaining({ location: 'Mataram' }));
             expect(cacheRepository.set).toHaveBeenCalledWith('weather:mataram', expect.objectContaining({ location: 'Mataram' }));
-            expect(logger.debug).toHaveBeenCalledWith('Fetching weather data for Mataram from external API.');
-            expect(logger.debug).toHaveBeenCalledWith('Saved weather data for Mataram to MongoDB.');
-            expect(logger.debug).toHaveBeenCalledWith('Cached weather data for Mataram in Redis.');
+            expect(logger.info).toHaveBeenCalledWith('Fetching weather data for Mataram from external API.');
+            expect(logger.info).toHaveBeenCalledWith('Saved weather data for Mataram to MongoDB.');
+            expect(logger.info).toHaveBeenCalledWith('Cached weather data for Mataram in Redis.');
             expect(result).toMatchObject({ ...mockWeatherData, location: "Mataram", timestamp: result?.timestamp });
             expect(publishToQueue).not.toHaveBeenCalled();
         });
@@ -117,14 +117,14 @@ describe('WeatherService', () => {
             const result = await weatherService.getWeatherData('Denpasar', true); // Explicit refresh
 
             expect(cacheRepository.invalidate).toHaveBeenCalledWith('weather:denpasar'); // Cache should be deleted
-            expect(logger.debug).toHaveBeenCalledWith('Forcing refresh, invalidating cache for Denpasar');
+            expect(logger.info).toHaveBeenCalledWith('Forcing refresh, invalidating cache for Denpasar');
             expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('api.openweathermap.org/data/2.5/weather'), expect.objectContaining({ params: expect.objectContaining({ q: "Denpasar" }) }));
             expect(weatherRepository.upsert).toHaveBeenCalledWith("Denpasar", expect.objectContaining({ location: 'Denpasar' }));
             expect(cacheRepository.set).toHaveBeenCalledWith('weather:denpasar', expect.objectContaining({ location: 'Denpasar' }));
             expect(publishToQueue).toHaveBeenCalledWith('weather_refresh_events', expect.objectContaining({ location: 'Denpasar' }));
-            expect(logger.debug).toHaveBeenCalledWith('Forcing refresh, invalidating cache for Denpasar');
-            expect(logger.debug).toHaveBeenCalledWith('Fetching weather data for Denpasar from external API.');
-            expect(logger.debug).toHaveBeenCalledWith('Saved weather data for Denpasar to MongoDB.');
+            expect(logger.info).toHaveBeenCalledWith('Forcing refresh, invalidating cache for Denpasar');
+            expect(logger.info).toHaveBeenCalledWith('Fetching weather data for Denpasar from external API.');
+            expect(logger.info).toHaveBeenCalledWith('Saved weather data for Denpasar to MongoDB.');
             expect(result).toEqual({ ...mockData, timestamp: result?.timestamp });
         });
 

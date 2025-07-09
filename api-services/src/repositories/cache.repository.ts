@@ -43,7 +43,7 @@ export class CacheRepository {
     async invalidate(key: string): Promise<void> {
         try {
             await this.redisClient.del(key);
-            logger.debug(`Cache invalidated for key: ${key}`);
+            logger.info(`Cache invalidated for key: ${key}`);
         } catch (error) {
             logger.error(`Error invalidating cache for key ${key}:`, error);
             throw error

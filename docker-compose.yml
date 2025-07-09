@@ -13,9 +13,12 @@ services:
 
   api-service:
     build:
-      context: ./api-services
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-services/Dockerfile
     image: weather-app/api-services:1.0.0
+    # command: /bin/sh # Atau /bin/bash
+    # stdin_open: true # Pertahankan stdin tetap terbuka
+    # tty: true
     ports:
       - "3000:3000"
     depends_on:
@@ -32,8 +35,8 @@ services:
 
   email-worker:
     build:
-      context: ./email-worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: email-worker/Dockerfile
     image: weather-app/email-worker:1.0.0
     depends_on:
       - rabbitmq
