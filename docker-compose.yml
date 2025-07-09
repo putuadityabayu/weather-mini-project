@@ -2,29 +2,47 @@ name: 'weather'
 services:
   rabbitmq:
     image: rabbitmq:3.13.1-alpine
+    healthcheck: # Healthcheck untuk RabbitMQ
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_listener","5672"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:alpine3.18
+    healthcheck: # Healthcheck untuk Redis
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   mongo:
     image: mongo
     volumes:
     - mongo_data:/data/db
+    healthcheck: # Healthcheck untuk MongoDB
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   api-service:
     build:
       context: .
       dockerfile: api-services/Dockerfile
     image: weather-app/api-services:1.0.0
-    # command: /bin/sh # Atau /bin/bash
-    # stdin_open: true # Pertahankan stdin tetap terbuka
-    # tty: true
     ports:
       - "3000:3000"
     depends_on:
-      - mongo
-      - redis
-      - rabbitmq
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
@@ -39,7 +57,8 @@ services:
       dockerfile: email-worker/Dockerfile
     image: weather-app/email-worker:1.0.0
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       RABBITMQ_URL: ${RABBITMQ_URL:-amqp://rabbitmq}
 
