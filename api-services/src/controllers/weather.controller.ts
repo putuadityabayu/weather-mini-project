@@ -32,7 +32,7 @@ export class WeatherController {
             if (weatherData) {
                 res.status(200).json({ data: weatherData, success: true });
             } else {
-                res.status(422).json({ success: false, error: 'Weather data for the specified location not found.' });
+                res.status(404).json({ success: false, error: 'Weather data for the specified location not found.' });
             }
         } catch (error) {
             logger.error(`Error in getWeatherByLocation for ${location}:`, error);
